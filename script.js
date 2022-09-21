@@ -28,7 +28,7 @@ class Workout {
 
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(
       1
-    )} on ${this.date.getDate()}th ${months[this.date.getMonth()]}`;
+    )} on ${this.date.getDate()} ${months[this.date.getMonth()]}`;
   }
 }
 
@@ -81,10 +81,14 @@ class App {
   constructor() {
     // triggering get position method
     this._getPosition();
+
+    this._getLocalStorage();
+
     // when user press enter in a form
     form.addEventListener('submit', this._newWorkOut.bind(this));
     // to toggle between running and cycling
     inputType.addEventListener('change', this._toggleElevationField);
+    // when user clicks on a workout form, it will move to that particular co-ordinate
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
 
@@ -118,6 +122,11 @@ class App {
 
     // event listener on click
     this.#map.on('click', this._showForm.bind(this));
+
+    //for rendering for stored workouts as map will be loaded first
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work);
+    });
   }
 
   _showForm(mapE) {
@@ -196,6 +205,8 @@ class App {
     this._renderWorkout(workout);
 
     this._hideForm();
+
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -282,6 +293,28 @@ class App {
         duration: 1,
       },
     });
+  }
+
+  _setLocalStorage() {
+    //local storage api
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+
+    if (!data) return;
+
+    this.#workouts = data;
+
+    this.#workouts.forEach(work => {
+      this._renderWorkout(work);
+    });
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
