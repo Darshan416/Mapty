@@ -75,6 +75,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 class App {
   #map; // for displaying map
   #mapEvent; //
+  #mapZoomLevel = 13;
   #workouts = []; // to store all the workout
 
   constructor() {
@@ -84,6 +85,7 @@ class App {
     form.addEventListener('submit', this._newWorkOut.bind(this));
     // to toggle between running and cycling
     inputType.addEventListener('change', this._toggleElevationField);
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
 
   _getPosition() {
@@ -106,7 +108,7 @@ class App {
     const coords = [latitude, longitude];
 
     // to set map view of user co-ordinate with zoom level = 13
-    this.#map = L.map('map').setView(coords, 13);
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
 
     // tile layer of google maps
     L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -263,6 +265,23 @@ class App {
     }
     //to insert to siblings of form element
     form.insertAdjacentHTML('afterend', html);
+  }
+
+  _moveToPopup(e) {
+    const workoutEl = e.target.closest('.workout');
+
+    if (!workoutEl) return;
+
+    const workout = this.#workouts.find(
+      work => work.id === workoutEl.dataset.id
+    );
+
+    this.#map.setView(workout.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
   }
 }
 
